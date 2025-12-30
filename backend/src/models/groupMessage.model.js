@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
 
-const messageSchema = new mongoose.Schema(
+const groupMessageSchema = new mongoose.Schema(
   {
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    receiverId: {
+    groupId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Group",
       required: true,
     },
     text: {
@@ -31,19 +31,37 @@ const messageSchema = new mongoose.Schema(
       enum: ['sent', 'delivered', 'read'],
       default: 'sent',
     },
-    readAt: {
-      type: Date,
-    },
-    deliveredAt: {
-      type: Date,
-    },
+    readBy: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        readAt: {
+          type: Date,
+          default: Date.now,
+        }
+      }
+    ],
+    deliveredTo: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        deliveredAt: {
+          type: Date,
+          default: Date.now,
+        }
+      }
+    ],
   },
   { timestamps: true }
 );
 
 // Add text index for efficient searching
-messageSchema.index({ text: "text" });
+groupMessageSchema.index({ text: "text" });
 
-const Message = mongoose.model("Message", messageSchema);
+const GroupMessage = mongoose.model("GroupMessage", groupMessageSchema);
 
-export default Message;
+export default GroupMessage;

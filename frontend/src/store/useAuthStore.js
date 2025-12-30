@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { requestNotificationPermission } from "../lib/notifications.js";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
@@ -13,6 +14,7 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   onlineUsers: [],
   socket: null,
+  notificationPermission: "default", // default, granted, denied
 
   checkAuth: async () => {
     try {
@@ -82,9 +84,15 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  connectSocket: () => {
+  connectSocket: async () => {
     const { authUser } = get();
     if (!authUser || get().socket?.connected) return;
+
+    // Request notification permission when connecting
+    if ("Notification" in window) {
+      const permission = await requestNotificationPermission();
+      set({ notificationPermission: permission ? "granted" : "denied" });
+    }
 
     const socket = io(BASE_URL, {
       query: {
@@ -98,6 +106,10 @@ export const useAuthStore = create((set, get) => ({
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
     });
+  },
+  
+  updateNotificationPermission: (permission) => {
+    set({ notificationPermission: permission });
   },
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();

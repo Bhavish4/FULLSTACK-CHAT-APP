@@ -20,6 +20,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    blockedUsers: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }],
+    privacySettings: {
+      showOnlineStatus: {
+        type: Boolean,
+        default: true,
+      },
+      allowMessaging: {
+        type: Boolean,
+        default: true,
+      },
+    },
   },
   { timestamps: true }
 );

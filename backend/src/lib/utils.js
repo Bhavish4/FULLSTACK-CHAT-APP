@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { validationResult } from "express-validator";
 
 export const generateToken = (userId, res) => {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -13,4 +14,13 @@ export const generateToken = (userId, res) => {
   });
 
   return token;
+};
+
+// Validation function to handle validation errors
+export const validate = (req, res, next) => {
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.status(400).json({ message: "Validation Error", errors: result.array() });
+  }
+  next();
 };
